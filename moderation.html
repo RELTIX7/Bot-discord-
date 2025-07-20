@@ -1,0 +1,322 @@
+
+{% extends "base.html" %}
+
+{% block title %}Modération{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-gavel"></i> Modération</h1>
+</div>
+
+<!-- Statistiques de modération -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body text-center">
+                <i class="fas fa-ban fa-2x mb-2"></i>
+                <h5 class="card-title">{{ ban_count }}</h5>
+                <p class="card-text">Bans actifs</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body text-center">
+                <i class="fas fa-volume-mute fa-2x mb-2"></i>
+                <h5 class="card-title">{{ mute_count }}</h5>
+                <p class="card-text">Mutes actifs</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body text-center">
+                <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                <h5 class="card-title">{{ warning_count }}</h5>
+                <p class="card-text">Avertissements</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stats-card">
+            <div class="card-body text-center">
+                <i class="fas fa-hammer fa-2x mb-2"></i>
+                <h5 class="card-title">{{ action_count }}</h5>
+                <p class="card-text">Actions aujourd'hui</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Onglets -->
+<ul class="nav nav-tabs" id="moderationTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="infractions-tab" data-bs-toggle="tab" data-bs-target="#infractions" type="button" role="tab">
+            <i class="fas fa-list"></i> Infractions
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="bans-tab" data-bs-toggle="tab" data-bs-target="#bans" type="button" role="tab">
+            <i class="fas fa-ban"></i> Bannissements
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="sanctions-tab" data-bs-toggle="tab" data-bs-target="#sanctions" type="button" role="tab">
+            <i class="fas fa-gavel"></i> Actions rapides
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="moderationTabsContent">
+    <!-- Onglet Infractions -->
+    <div class="tab-pane fade show active" id="infractions" role="tabpanel">
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-exclamation-triangle"></i> Dernières infractions</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Utilisateur</th>
+                                <th>Type</th>
+                                <th>Raison</th>
+                                <th>Modérateur</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for infraction in infractions %}
+                            <tr>
+                                <td>
+                                    <strong>{{ infraction.user_name or 'ID: ' + infraction.user_id|string }}</strong>
+                                    <br><small class="text-muted">{{ infraction.user_id }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ 'danger' if infraction.type == 'BAN' else 'warning' if infraction.type == 'WARN' else 'secondary' }}">
+                                        {{ infraction.type }}
+                                    </span>
+                                </td>
+                                <td>{{ infraction.reason[:50] }}{% if infraction.reason|length > 50 %}...{% endif %}</td>
+                                <td>{{ infraction.moderator_name or 'Inconnu' }}</td>
+                                <td>{{ infraction.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewDetails({{ infraction.id }})">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onglet Bannissements -->
+    <div class="tab-pane fade" id="bans" role="tabpanel">
+        <div class="card mt-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-ban"></i> Utilisateurs bannis</h5>
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#unbanModal">
+                    <i class="fas fa-user-plus"></i> Débannir
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Utilisateur</th>
+                                <th>Raison</th>
+                                <th>Date du ban</th>
+                                <th>Modérateur</th>
+                                <th>Type</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ban in banned_users %}
+                            <tr>
+                                <td>
+                                    <strong>{{ ban.user_name or 'Utilisateur inconnu' }}</strong>
+                                    <br><small class="text-muted">ID: {{ ban.user_id }}</small>
+                                </td>
+                                <td>{{ ban.reason }}</td>
+                                <td>{{ ban.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>{{ ban.moderator_name or 'Inconnu' }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'warning' if 'temp' in ban.reason.lower() else 'danger' }}">
+                                        {{ 'Temporaire' if 'temp' in ban.reason.lower() else 'Permanent' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-success" onclick="unbanUser({{ ban.user_id }})">
+                                        <i class="fas fa-user-plus"></i> Débannir
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onglet Actions rapides -->
+    <div class="tab-pane fade" id="sanctions" role="tabpanel">
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-search"></i> Rechercher un utilisateur</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="userSearchForm">
+                            <div class="mb-3">
+                                <label for="userIdSearch" class="form-label">ID Utilisateur</label>
+                                <input type="text" class="form-control" id="userIdSearch" placeholder="ID Discord de l'utilisateur">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Rechercher
+                            </button>
+                        </form>
+                        
+                        <div id="userInfo" class="mt-3" style="display: none;">
+                            <div class="alert alert-info">
+                                <h6>Informations utilisateur :</h6>
+                                <div id="userDetails"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-bar"></i> Statistiques utilisateur</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="userStats">
+                            <p class="text-muted">Recherchez un utilisateur pour voir ses statistiques</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Débannir -->
+<div class="modal fade" id="unbanModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Débannir un utilisateur</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="unbanForm">
+                    <div class="mb-3">
+                        <label for="unbanUserId" class="form-label">ID de l'utilisateur</label>
+                        <input type="text" class="form-control" id="unbanUserId" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="unbanReason" class="form-label">Raison du débannissement</label>
+                        <textarea class="form-control" id="unbanReason" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-success" onclick="submitUnban()">Débannir</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function viewDetails(infractionId) {
+    // Afficher les détails d'une infraction
+    alert('Détails de l\'infraction #' + infractionId);
+}
+
+function unbanUser(userId) {
+    if (confirm('Voulez-vous vraiment débannir cet utilisateur ?')) {
+        fetch('/api/unban', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({user_id: userId})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erreur : ' + data.error);
+            }
+        });
+    }
+}
+
+function submitUnban() {
+    const userId = document.getElementById('unbanUserId').value;
+    const reason = document.getElementById('unbanReason').value;
+    
+    if (!userId) {
+        alert('Veuillez entrer un ID utilisateur');
+        return;
+    }
+    
+    fetch('/api/unban', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({user_id: userId, reason: reason})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Erreur : ' + data.error);
+        }
+    });
+}
+
+document.getElementById('userSearchForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const userId = document.getElementById('userIdSearch').value;
+    
+    if (!userId) return;
+    
+    fetch('/api/user-info/' + userId)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('userDetails').innerHTML = `
+                <strong>Nom:</strong> ${data.user.name}<br>
+                <strong>Niveau:</strong> ${data.user.level || 0}<br>
+                <strong>XP:</strong> ${data.user.xp || 0}<br>
+                <strong>Messages:</strong> ${data.user.messages || 0}
+            `;
+            document.getElementById('userInfo').style.display = 'block';
+            
+            document.getElementById('userStats').innerHTML = `
+                <strong>Avertissements:</strong> ${data.user.warnings || 0}<br>
+                <strong>Dernière activité:</strong> ${data.user.last_activity || 'Inconnue'}<br>
+                <strong>Statut:</strong> ${data.user.banned ? 'Banni' : 'Actif'}
+            `;
+        } else {
+            alert('Utilisateur non trouvé');
+        }
+    });
+});
+</script>
+{% endblock %}

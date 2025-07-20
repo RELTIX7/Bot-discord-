@@ -1,0 +1,262 @@
+
+{% extends "base.html" %}
+
+{% block title %}Messages - Bot Discord{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-paper-plane"></i> Gestion des Messages</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-edit"></i> Envoyer un Message</h5>
+            </div>
+            <div class="card-body">
+                <form id="messageForm">
+                    <div class="mb-3">
+                        <label for="channelId" class="form-label">ID du Salon</label>
+                        <input type="text" class="form-control" id="channelId" placeholder="Ex: 123456789012345678" required>
+                        <div class="form-text">Pour obtenir l'ID d'un salon, activez le mode développeur dans Discord et faites clic droit sur le salon.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="messageType" class="form-label">Type de Message</label>
+                        <select class="form-select" id="messageType">
+                            <option value="simple">Message Simple</option>
+                            <option value="embed">Message Embed</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Message Simple -->
+                    <div id="simpleMessage">
+                        <div class="mb-3">
+                            <label for="messageContent" class="form-label">Contenu du Message</label>
+                            <textarea class="form-control" id="messageContent" rows="4" placeholder="Tapez votre message ici..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Message Embed -->
+                    <div id="embedMessage" style="display: none;">
+                        <div class="mb-3">
+                            <label for="embedTitle" class="form-label">Titre de l'Embed</label>
+                            <input type="text" class="form-control" id="embedTitle" placeholder="Titre de votre embed">
+                        </div>
+                        <div class="mb-3">
+                            <label for="embedDescription" class="form-label">Description de l'Embed</label>
+                            <textarea class="form-control" id="embedDescription" rows="4" placeholder="Description de votre embed..."></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="embedColor" class="form-label">Couleur</label>
+                                    <select class="form-select" id="embedColor">
+                                        <option value="3498db">Bleu</option>
+                                        <option value="00ff00">Vert</option>
+                                        <option value="ff0000">Rouge</option>
+                                        <option value="ffff00">Jaune</option>
+                                        <option value="9932cc">Violet</option>
+                                        <option value="ff9900">Orange</option>
+                                        <option value="000000">Noir</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="embedFooter" class="form-label">Footer (optionnel)</label>
+                                    <input type="text" class="form-control" id="embedFooter" placeholder="Texte du footer">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="embedImageUrl" class="form-label">URL de l'Image (optionnel)</label>
+                            <input type="url" class="form-control" id="embedImageUrl" placeholder="https://exemple.com/image.png">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Envoyer le Message
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Aide</h5>
+            </div>
+            <div class="card-body">
+                <h6>Comment obtenir l'ID d'un salon ?</h6>
+                <ol class="small">
+                    <li>Activez le mode développeur dans Discord (Paramètres → Avancé → Mode développeur)</li>
+                    <li>Faites clic droit sur le salon souhaité</li>
+                    <li>Cliquez sur "Copier l'ID"</li>
+                </ol>
+                
+                <hr>
+                
+                <h6>Types de messages :</h6>
+                <ul class="small">
+                    <li><strong>Simple :</strong> Message texte basique</li>
+                    <li><strong>Embed :</strong> Message avec mise en forme avancée</li>
+                </ul>
+                
+                <hr>
+                
+                <h6>Conseils :</h6>
+                <ul class="small">
+                    <li>Utilisez @everyone ou @here avec modération</li>
+                    <li>Les embeds sont plus visuels et professionnels</li>
+                    <li>Vérifiez l'ID du salon avant d'envoyer</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-history"></i> Historique</h5>
+            </div>
+            <div class="card-body">
+                <div id="messageHistory" class="small">
+                    <p class="text-muted">Aucun message envoyé récemment.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const messageTypeSelect = document.getElementById('messageType');
+    const simpleMessage = document.getElementById('simpleMessage');
+    const embedMessage = document.getElementById('embedMessage');
+    const messageForm = document.getElementById('messageForm');
+    const messageHistory = document.getElementById('messageHistory');
+    
+    // Changer le type de message
+    messageTypeSelect.addEventListener('change', function() {
+        if (this.value === 'embed') {
+            simpleMessage.style.display = 'none';
+            embedMessage.style.display = 'block';
+        } else {
+            simpleMessage.style.display = 'block';
+            embedMessage.style.display = 'none';
+        }
+    });
+    
+    // Soumettre le formulaire
+    messageForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const channelId = document.getElementById('channelId').value;
+        const messageType = document.getElementById('messageType').value;
+        
+        let messageData = {
+            channel_id: channelId,
+            type: messageType
+        };
+        
+        if (messageType === 'simple') {
+            messageData.content = document.getElementById('messageContent').value;
+        } else {
+            messageData.embed = {
+                title: document.getElementById('embedTitle').value,
+                description: document.getElementById('embedDescription').value,
+                color: document.getElementById('embedColor').value,
+                footer: document.getElementById('embedFooter').value,
+                image_url: document.getElementById('embedImageUrl').value
+            };
+        }
+        
+        try {
+            const response = await fetch('/api/send-message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(messageData)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Ajouter à l'historique
+                addToHistory(messageData);
+                
+                // Réinitialiser le formulaire
+                messageForm.reset();
+                
+                // Afficher le succès
+                showAlert('Message envoyé avec succès !', 'success');
+            } else {
+                showAlert('Erreur: ' + result.error, 'danger');
+            }
+        } catch (error) {
+            showAlert('Erreur de connexion: ' + error.message, 'danger');
+        }
+    });
+    
+    function addToHistory(messageData) {
+        const now = new Date().toLocaleString('fr-FR');
+        const historyItem = document.createElement('div');
+        historyItem.className = 'border-bottom pb-2 mb-2';
+        
+        let content = '';
+        if (messageData.type === 'simple') {
+            content = messageData.content.substring(0, 50) + (messageData.content.length > 50 ? '...' : '');
+        } else {
+            content = messageData.embed.title || 'Embed sans titre';
+        }
+        
+        historyItem.innerHTML = `
+            <div class="fw-bold">${messageData.type === 'simple' ? 'Message' : 'Embed'}</div>
+            <div class="text-muted">${content}</div>
+            <div class="text-muted small">Salon: ${messageData.channel_id}</div>
+            <div class="text-muted small">${now}</div>
+        `;
+        
+        if (messageHistory.children.length === 1 && messageHistory.children[0].textContent.includes('Aucun message')) {
+            messageHistory.innerHTML = '';
+        }
+        
+        messageHistory.insertBefore(historyItem, messageHistory.firstChild);
+        
+        // Garder seulement les 5 derniers
+        while (messageHistory.children.length > 5) {
+            messageHistory.removeChild(messageHistory.lastChild);
+        }
+    }
+    
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Trouver le conteneur principal et insérer l'alerte au début
+        const mainContent = document.querySelector('.container-fluid') || document.body;
+        const firstChild = mainContent.firstElementChild;
+        
+        if (firstChild) {
+            mainContent.insertBefore(alertDiv, firstChild);
+        } else {
+            mainContent.appendChild(alertDiv);
+        }
+        
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.parentNode.removeChild(alertDiv);
+            }
+        }, 5000);
+    }
+});
+</script>
+{% endblock %}

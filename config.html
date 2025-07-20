@@ -1,0 +1,94 @@
+
+{% extends "base.html" %}
+
+{% block title %}Configuration - Bot Discord{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-cog"></i> Configuration des serveurs</h1>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGuildModal">
+        <i class="fas fa-plus"></i> Ajouter un serveur
+    </button>
+</div>
+
+{% if guilds %}
+<div class="row">
+    {% for guild in guilds %}
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Serveur ID: {{ guild.guild_id }}</h6>
+                <a href="{{ url_for('edit_config', guild_id=guild.guild_id) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-edit"></i> Modifier
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <small class="text-muted">Canal bienvenue:</small><br>
+                        <span class="badge bg-success">{{ guild.welcome_channel or 'Non configuré' }}</span>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">Canal au revoir:</small><br>
+                        <span class="badge bg-info">{{ guild.goodbye_channel or 'Non configuré' }}</span>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-6">
+                        <small class="text-muted">Canal logs:</small><br>
+                        <span class="badge bg-warning">{{ guild.log_channel or 'Non configuré' }}</span>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">Rôle auto:</small><br>
+                        <span class="badge bg-secondary">{{ guild.auto_role or 'Non configuré' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5">
+    <i class="fas fa-server fa-3x text-muted mb-3"></i>
+    <h4 class="text-muted">Aucun serveur configuré</h4>
+    <p class="text-muted">Ajoutez votre premier serveur pour commencer !</p>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGuildModal">
+        <i class="fas fa-plus"></i> Ajouter un serveur
+    </button>
+</div>
+{% endif %}
+
+<!-- Modal d'ajout de serveur -->
+<div class="modal fade" id="addGuildModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter un serveur</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('save_config') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="guild_id" class="form-label">ID du serveur Discord</label>
+                        <input type="text" class="form-control" id="guild_id" name="guild_id" required>
+                        <small class="form-text text-muted">Vous pouvez trouver l'ID en activant le mode développeur dans Discord.</small>
+                    </div>
+                    
+                    <!-- Champs cachés pour éviter l'erreur -->
+                    <input type="hidden" name="welcome_channel" value="">
+                    <input type="hidden" name="goodbye_channel" value="">
+                    <input type="hidden" name="log_channel" value="">
+                    <input type="hidden" name="level_up_channel" value="">
+                    <input type="hidden" name="auto_role" value="">
+                    <input type="hidden" name="mute_role" value="">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

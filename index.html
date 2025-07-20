@@ -1,0 +1,120 @@
+
+{% extends "base.html" %}
+
+{% block title %}Tableau de bord - Bot Discord{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-home"></i> Tableau de bord</h1>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card stats-card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-2x mb-2"></i>
+                <h4>{{ user_count }}</h4>
+                <p class="mb-0">Utilisateurs actifs</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card stats-card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-server fa-2x mb-2"></i>
+                <h4>{{ guild_count }}</h4>
+                <p class="mb-0">Serveurs configurés</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card stats-card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                <h4>{{ warning_count }}</h4>
+                <p class="mb-0">Avertissements</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card stats-card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-robot fa-2x mb-2"></i>
+                <h4 class="text-success">En ligne</h4>
+                <p class="mb-0">Statut du bot</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> À propos du bot</h5>
+            </div>
+            <div class="card-body">
+                <p>Votre bot Discord français avec toutes les fonctionnalités de MEE6 :</p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Système de niveaux complet</li>
+                    <li><i class="fas fa-check text-success"></i> Modération avancée</li>
+                    <li><i class="fas fa-check text-success"></i> Messages de bienvenue</li>
+                    <li><i class="fas fa-check text-success"></i> Système de logs</li>
+                    <li><i class="fas fa-check text-success"></i> Commandes fun</li>
+                    <li><i class="fas fa-check text-success"></i> Configuration flexible</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-rocket"></i> Actions rapides</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('config') }}" class="btn btn-primary">
+                        <i class="fas fa-cog"></i> Configurer un serveur
+                    </a>
+                    <a href="{{ url_for('level_roles') }}" class="btn btn-info">
+                        <i class="fas fa-medal"></i> Gérer les rôles de niveau
+                    </a>
+                    <a href="{{ url_for('levels') }}" class="btn btn-success">
+                        <i class="fas fa-chart-line"></i> Voir le classement
+                    </a>
+                    <a href="{{ url_for('warnings') }}" class="btn btn-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Gérer les avertissements
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-question-circle"></i> Comment utiliser le bot</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-play text-primary"></i> 1. Inviter le bot</h6>
+                        <p class="small text-muted">Invitez votre bot sur vos serveurs Discord avec les bonnes permissions.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-cog text-info"></i> 2. Configurer</h6>
+                        <p class="small text-muted">Utilisez ce panneau ou les commandes Discord pour configurer votre bot.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-smile text-success"></i> 3. Profiter</h6>
+                        <p class="small text-muted">Votre communauté peut maintenant profiter de toutes les fonctionnalités !</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

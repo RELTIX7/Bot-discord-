@@ -1,0 +1,59 @@
+
+{% extends "base.html" %}
+
+{% block title %}Avertissements - Bot Discord{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-exclamation-triangle"></i> Avertissements</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if warnings %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Utilisateur ID</th>
+                        <th>Serveur ID</th>
+                        <th>Nombre total</th>
+                        <th>Dernier avertissement</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for warning in warnings %}
+                    <tr>
+                        <td><code>{{ warning.user_id }}</code></td>
+                        <td><code>{{ warning.guild_id }}</code></td>
+                        <td>
+                            <span class="badge bg-{{ 'danger' if warning.total_warnings >= 3 else 'warning' }}">
+                                {{ warning.total_warnings }} avertissement(s)
+                            </span>
+                        </td>
+                        <td>{{ warning.timestamp[:19] if warning.timestamp else 'N/A' }}</td>
+                        <td>
+                            {% if warning.total_warnings >= 5 %}
+                                <span class="badge bg-danger">Critique</span>
+                            {% elif warning.total_warnings >= 3 %}
+                                <span class="badge bg-warning">Attention</span>
+                            {% else %}
+                                <span class="badge bg-success">Normal</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+            <h5 class="text-muted">Aucun avertissement</h5>
+            <p class="text-muted">Excellente communauté ! Aucun avertissement enregistré.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,86 @@
+
+{% extends "base.html" %}
+
+{% block title %}Rôles de niveau - Bot Discord{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-medal"></i> Rôles de niveau</h1>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRoleModal">
+        <i class="fas fa-plus"></i> Ajouter un rôle
+    </button>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if level_roles %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Serveur ID</th>
+                        <th>Niveau requis</th>
+                        <th>Rôle ID</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for role in level_roles %}
+                    <tr>
+                        <td><code>{{ role.guild_id }}</code></td>
+                        <td><span class="badge bg-primary">Niveau {{ role.level }}</span></td>
+                        <td><code>{{ role.role_id }}</code></td>
+                        <td>
+                            <a href="{{ url_for('delete_level_role', guild_id=role.guild_id, level=role.level) }}" 
+                               class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce rôle de niveau ?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-medal fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Aucun rôle de niveau configuré</h5>
+            <p class="text-muted">Ajoutez des rôles pour récompenser vos utilisateurs actifs !</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal d'ajout de rôle -->
+<div class="modal fade" id="addRoleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter un rôle de niveau</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('add_level_role') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="guild_id" class="form-label">ID du serveur</label>
+                        <input type="text" class="form-control" id="guild_id" name="guild_id" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="level" class="form-label">Niveau requis</label>
+                        <input type="number" class="form-control" id="level" name="level" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="role_id" class="form-label">ID du rôle</label>
+                        <input type="text" class="form-control" id="role_id" name="role_id" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

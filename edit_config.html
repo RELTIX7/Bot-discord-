@@ -1,0 +1,108 @@
+
+{% extends "base.html" %}
+
+{% block title %}Éditer Configuration - Bot Discord{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-edit"></i> Éditer la configuration</h1>
+    <a href="{{ url_for('config') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Retour
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Configuration du serveur {{ guild_id }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('save_config') }}">
+                    <input type="hidden" name="guild_id" value="{{ guild_id }}">
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="welcome_channel" class="form-label">Canal de bienvenue</label>
+                            <input type="text" class="form-control" id="welcome_channel" name="welcome_channel" 
+                                   value="{{ guild.welcome_channel if guild else '' }}" 
+                                   placeholder="ID du canal">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="goodbye_channel" class="form-label">Canal d'au revoir</label>
+                            <input type="text" class="form-control" id="goodbye_channel" name="goodbye_channel" 
+                                   value="{{ guild.goodbye_channel if guild else '' }}" 
+                                   placeholder="ID du canal">
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="log_channel" class="form-label">Canal de logs</label>
+                            <input type="text" class="form-control" id="log_channel" name="log_channel" 
+                                   value="{{ guild.log_channel if guild else '' }}" 
+                                   placeholder="ID du canal">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="level_up_channel" class="form-label">Canal de level up</label>
+                            <input type="text" class="form-control" id="level_up_channel" name="level_up_channel" 
+                                   value="{{ guild.level_up_channel if guild else '' }}" 
+                                   placeholder="ID du canal">
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="auto_role" class="form-label">Rôle automatique</label>
+                            <input type="text" class="form-control" id="auto_role" name="auto_role" 
+                                   value="{{ guild.auto_role if guild else '' }}" 
+                                   placeholder="ID du rôle">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="mute_role" class="form-label">Rôle de mute</label>
+                            <input type="text" class="form-control" id="mute_role" name="mute_role" 
+                                   value="{{ guild.mute_role if guild else '' }}" 
+                                   placeholder="ID du rôle">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Sauvegarder
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-info-circle"></i> Comment obtenir les IDs</h6>
+            </div>
+            <div class="card-body">
+                <ol class="small">
+                    <li>Activez le mode développeur dans Discord</li>
+                    <li>Clic droit sur un canal/rôle</li>
+                    <li>Sélectionnez "Copier l'ID"</li>
+                    <li>Collez l'ID dans le champ correspondant</li>
+                </ol>
+                <hr>
+                <h6><i class="fas fa-medal"></i> Rôles de niveau</h6>
+                {% if level_roles %}
+                    {% for role in level_roles %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-primary">Niveau {{ role.level }}</span>
+                        <span class="small">{{ role.role_id }}</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="small text-muted">Aucun rôle de niveau configuré</p>
+                {% endif %}
+                <a href="{{ url_for('level_roles') }}" class="btn btn-sm btn-outline-primary">
+                    Gérer les rôles
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
